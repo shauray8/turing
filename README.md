@@ -15,4 +15,4 @@ z = Tensor.eye(2, requires_grad=False)
 
 ## About Turing 
 
-** updating readme 
+** updating readme .
