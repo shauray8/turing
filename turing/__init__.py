@@ -1,1 +1,1 @@
-from turing import *
+from turing import tensor
