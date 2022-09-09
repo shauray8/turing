@@ -11,4 +11,8 @@ z = Tensor.eye(2, requires_grad=False)
 
 ## Tensor is just a numpy array with gradients
 ```
+
+
+## About Turing 
+
 ** updating readme 
