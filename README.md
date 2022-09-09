@@ -1,5 +1,6 @@
 # Turing
 Turing is an Autograd Engine which as said computes gradients for your neural network.
+This is a very light weight autograd engine 
 
 ## Example
 ```
