@@ -1,3 +1,3 @@
-from turing.tensor import Tensor
+from turing import tensor
 
-print(Tensor(10))
+print(tensor.Tensor.eye(10))
