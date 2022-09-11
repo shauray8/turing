@@ -1,7 +1,6 @@
 import numpy as np
 from typing import Optional
 
-
 class Tensor:
   def __init__(self,data,requires_grad=True,_children=()):
     self.data = data.astype('float32') if isinstance(data, np.ndarray) else np.array(data, dtype=np.float32)
@@ -33,6 +32,10 @@ class Tensor:
   def __sub__(self, other):
     other = other if isinstance(other, Tensor) else Tensor(other)
     return Tensor(self.data - other.data)
+
+  def backward():
+    ## some tree node shit gonna copy and paste from karpathy's micrograd
+    return 
 
 
   def eye(dim, **kwargs): return Tensor(np.eye(dim, dtype=np.float32),**kwargs)
