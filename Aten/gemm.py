@@ -7,7 +7,7 @@ N = 1024
 A = np.random.randn(N,N).astype(np.float32)
 B = np.random.randn(N,N).astype(np.float32)
 
-for i in range(100):
+for i in range(1):
   st = time.monotonic()
   res = np.matmul(A,B)
   et = time.monotonic()
