@@ -8,6 +8,7 @@
 #define N 1024
 #define ll long long
 #define NUM_WORKERS 8
+#define BLOCK 64
 
 using namespace std;
 
@@ -36,11 +37,6 @@ void static_v1(){
       }
     }
   }
-  for(int i=0; i<N; i++){
-    for(int j=0; j<N; j++){
-        printf("%f\n",res[i][j]);
-    }
-  }
 }
 
 // g++ -fopenmp gemm.cpp -o gemm && ./gemm
@@ -60,9 +56,26 @@ void dynamic_v1(){
   }
 }
 
+// spliting into blocks of size BLOCK and then computing the matrix product (gives off no significant improvement)
+void strassen(){
+  for(int ii=0; ii<N; ii+=BLOCK){
+    for(int jj=0; jj<N; jj+=BLOCK){
+
+      for(int i=0; i<BLOCK; i++){
+        for(int j=0; j<BLOCK; j++){
+          for(int k=0; k<N; k++){
+            res[ii+i][jj+j] += A[ii+i][k] * B[jj+j][k];
+          }
+        }
+      }
+
+    }
+  }
+}
+
 int main(){
   uint64_t start = nanos();
-  dynamic_v1();
+  strassen();
   uint64_t end = nanos();
   double time = double(end-start)*1e-9;
   double flop = (N*N*2.0*N) *1e-9;
