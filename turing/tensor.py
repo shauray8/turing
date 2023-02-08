@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# ToDo - create something more usefull then numpy for turing specifically !
 import numpy as np
 from typing import Optional
 from graph import *
