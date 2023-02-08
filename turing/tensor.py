@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+
 import numpy as np
 from typing import Optional
+from graph import *
 
 class Tensor:
   def __init__(self,data,requires_grad=False,_children=()):
@@ -63,8 +66,5 @@ if __name__ == "__main__":
 
   a = Tensor(10,requires_grad=True)
   b = Tensor(99,requires_grad=True)
-  c = a + b
-  d = c * a**2
-  e = d / b
-  print(e)
-    
+
+
