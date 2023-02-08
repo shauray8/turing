@@ -4,6 +4,7 @@
 #include <omp.h>
 #include <time.h>
 #include <vector>
+#include <immintrin.h>
 
 #define N 1024
 #define ll long long
@@ -17,9 +18,11 @@ using namespace std;
 //vector<vector<float>> B(N, vector<float>(N,0));
 //vector<vector<float>> res(N, vector<float>(N,0));
 
+
 float A[N][N];
 float B[N][N];
 float res[N][N];
+__m256 *Am = (__m256*)A;
 
 int64_t nanos() {
     struct timespec start;
