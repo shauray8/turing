@@ -45,6 +45,7 @@ void static_v1(){
 
 // g++ -fopenmp gemm.cpp -o gemm && ./gemm
 // I don't actually know if it's right or not but it runs on all the threads and gives off: 1.350512
+// this is probably wrong !
 void dynamic_v1(){
   float acc = 0;
   #pragma omp parallel for schedule(static,NUM_WORKERS) reduction(+:acc)
@@ -52,7 +53,7 @@ void dynamic_v1(){
     for(int j=0; j<N; j++){
       acc = 0;
       for(int k=0; k<N; k++){
-        acc += A[i][k] * B[k][j];
+        acc += A[i][k] * B[j][k];
       }
       res[i][j] = acc;
     }

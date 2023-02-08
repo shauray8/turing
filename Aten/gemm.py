@@ -9,7 +9,7 @@ B = np.random.randn(N,N).astype(np.float32)
 
 for i in range(100):
   st = time.monotonic()
-  res = A@B
+  res = np.matmul(A,B)
   et = time.monotonic()
   gflop = (N*N*2.0*N)*1e-9
   s = et-st
