@@ -6,7 +6,7 @@
 #include <vector>
 #include <immintrin.h>
 
-#define N 1024
+#define N 2048
 #define ll long long
 #define NUM_WORKERS 8
 #define BLOCK 64
@@ -78,9 +78,10 @@ void strassen(){
 
 int main(){
   uint64_t start = nanos();
-  strassen();
+  dynamic_v1();
   uint64_t end = nanos();
   double time = double(end-start)*1e-9;
   double flop = (N*N*2.0*N) *1e-9;
   printf("GFLOP/s: %f\n",flop/time);
 }
+
