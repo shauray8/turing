@@ -55,12 +55,20 @@ void static_v1(){
 
 // SIMD on this 
 void static_v2(){
+  // i goes from 0-8, 9-16, 17-24 that is 8 after 8
   for(int i=0; i<N; i+=BLOCK){
+    // j goes from 0-8, 9-16, 17-24 that is 8 after 8
     for(int j=0; j<N; j+=BLOCK){
-      __m256 acc;
+      // till here we have i : 0-8 and j : 0-8
+      float tc[BLOCK];
       for(int k=0; k<BLOCK; k++){
-        acc += Am[i][k] * Bm[k][j];
+        // here we have an array with A : 0-8 * B : 0-8 in 0-8 slots
+        // make this __m256
+        // there is something called multiply and add together ! (SIMD)
+         tc[k] = A[i][k] * B[k][j];
       }
+      // add sum of tc to C[i][j]
+      C[i][j] = sum(tc);
     }
   }
 }
