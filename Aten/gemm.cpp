@@ -68,7 +68,7 @@ void static_v2(){
          tc[k] = A[i][k] * B[k][j];
       }
       // add sum of tc to C[i][j]
-      C[i][j] = sum(tc);
+      //C[i][j] = sum(tc);
     }
   }
 }
