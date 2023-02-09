@@ -4,9 +4,10 @@
 #include <omp.h>
 #include <time.h>
 #include <vector>
+#include <math.h>
 #include <immintrin.h>
 
-#define N 2048
+#define N 512
 #define ll long long
 #define NUM_WORKERS 8
 #define BLOCK 64
@@ -14,14 +15,15 @@
 using namespace std;
 
 // slows the performance down !
-//vector<vector<float>> A(N, vector<float>(N,0));
-//vector<vector<float>> B(N, vector<float>(N,0));
+//vector<vector<float>> A(N, vector<float>(N,1));
+//vector<vector<float>> B(N, vector<float>(N,1));
 //vector<vector<float>> res(N, vector<float>(N,0));
-
 
 float A[N][N];
 float B[N][N];
 float res[N][N];
+float val[N][N];
+
 __m256 *Am = (__m256*)A;
 
 int64_t nanos() {
@@ -40,6 +42,13 @@ void static_v1(){
       }
     }
   }
+  for(int i=0; i<N; i++){
+    for(int j=0; j<N; j++){
+      if (fabsf(res[i][j]-val[i][j]) > 1e-3){
+        printf("MISMATCH AT %d, %d :: %f != %f",i,j,res[i][j], val[i][j]);
+      }
+    }
+  }
 }
 
 // g++ -fopenmp gemm.cpp -o gemm && ./gemm
@@ -52,9 +61,16 @@ void dynamic_v1(){
     for(int j=0; j<N; j++){
       acc = 0;
       for(int k=0; k<N; k++){
-        acc += A[i][k] * B[j][k];
+        acc += A[i][k] * B[k][j];
       }
       res[i][j] = acc;
+    }
+  }
+  for(int i=0; i<N; i++){
+    for(int j=0; j<N; j++){
+      if (fabsf(res[i][j]-val[i][j]) > 1e-3){
+        printf("MISMATCH AT %d, %d :: %f != %f",i,j,res[i][j], val[i][j]);
+      }
     }
   }
 }
@@ -76,7 +92,16 @@ void strassen(){
   }
 }
 
+// the compiler does use some XMM's but not very efficiently and no YMM's at all (?? do I not have AVX 2 ??)
+// my processor does support AVX2 its just the compiler ! making it better 
 int main(){
+
+  FILE *f = fopen("./tmp/data","rb");
+  fread(A, 1, sizeof(float)*N*N, f);
+  fread(B, 1, sizeof(float)*N*N, f);
+  fread(val, 1, sizeof(float)*N*N, f);
+  fclose(f);
+
   uint64_t start = nanos();
   dynamic_v1();
   uint64_t end = nanos();
