@@ -1,5 +1,6 @@
 ## geting a benchmark on matrix multiplication 
 
+### Matrix Multiplication is the most important part of a neural network !!
 "Numpy is almost a 100 times improvement from strassen, it does run on a single thread but I dont know how to make it parallel :( "
 
 
