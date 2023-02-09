@@ -7,10 +7,10 @@
 #include <math.h>
 #include <immintrin.h>
 
-#define N 512
+#define N 1024
 #define ll long long
 #define NUM_WORKERS 8
-#define BLOCK 64
+#define BLOCK 8
 
 using namespace std;
 
@@ -25,6 +25,8 @@ float res[N][N];
 float val[N][N];
 
 __m256 *Am = (__m256*)A;
+__m256 *Bm = (__m256*)B;
+__m256 *resm = (__m256*)res;
 
 int64_t nanos() {
     struct timespec start;
@@ -51,6 +53,19 @@ void static_v1(){
   }
 }
 
+// SIMD on this 
+void static_v2(){
+  for(int i=0; i<N; i+=BLOCK){
+    for(int j=0; j<N; j+=BLOCK){
+      __m256 acc;
+      for(int k=0; k<BLOCK; k++){
+        acc += Am[i][k] * Bm[k][j];
+      }
+    }
+  }
+}
+
+
 // g++ -fopenmp gemm.cpp -o gemm && ./gemm
 // I don't actually know if it's right or not but it runs on all the threads and gives off: 1.350512
 // this is probably wrong !
@@ -61,7 +76,7 @@ void dynamic_v1(){
     for(int j=0; j<N; j++){
       acc = 0;
       for(int k=0; k<N; k++){
-        acc += A[i][k] * B[k][j];
+        acc += A[i][k] * B[j][k];
       }
       res[i][j] = acc;
     }
@@ -80,6 +95,24 @@ void strassen(){
   for(int ii=0; ii<N; ii+=BLOCK){
     for(int jj=0; jj<N; jj+=BLOCK){
 
+      for(int i=0; i<BLOCK; i++){
+        for(int j=0; j<BLOCK; j++){
+          for(int k=0; k<N; k++){
+            res[ii+i][jj+j] += A[ii+i][k] * B[jj+j][k];
+          }
+        }
+      }
+
+    }
+  }
+}
+
+// using __m256 to optmize strassen !
+void strassen_v2(){
+  for(int ii=0; ii<N; ii+=BLOCK){
+    for(int jj=0; jj<N; jj+=BLOCK){
+
+      __m256 temp[BLOCK];
       for(int i=0; i<BLOCK; i++){
         for(int j=0; j<BLOCK; j++){
           for(int k=0; k<N; k++){
