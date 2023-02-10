@@ -55,6 +55,7 @@ void static_v1(){
 }
 
 // SIMD on this 
+// first try without the SIMD but with 8 variable's simul !1
 void static_v2(){
   // i goes from 0-8, 9-16, 17-24 that is 8 after 8
   for(int i=0; i<N; i+=BLOCK){
