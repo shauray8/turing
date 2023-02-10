@@ -1,3 +1,8 @@
-from turing import tensor
+import turing
+import torch
 
-print(tensor.Tensor.eye(10))
+A = turing.v_space([10])
+B = turing.v_space(10)
+
+print(turing.eye(10) @ turing.eye(10))
+print(A)

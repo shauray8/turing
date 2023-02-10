@@ -1,2 +1,2 @@
-from turing import tensor
+from turing.v_space import *
 
