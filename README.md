@@ -17,3 +17,6 @@ z = Tensor.eye(2, requires_grad=False)
 ## About Turing 
 
 ** updating readme .
+
+
+#### Usw somw kind of tests maybe travus ??
