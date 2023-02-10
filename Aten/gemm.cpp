@@ -1,3 +1,4 @@
+// python3 gemm.py && g++ -funroll-loops -fopenmp gemm.cpp -o gemm -O3 -ffast-math -march=core2 && ./gemm
 // General matrix multiplication benchmarking 
 // https://petewarden.com/2015/04/20/why-gemm-is-at-the-heart-of-deep-learning/
 #include <iostream>
