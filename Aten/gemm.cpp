@@ -91,13 +91,6 @@ void dynamic_v1(){
       res[i][j] = acc;
     }
   }
-  for(int i=0; i<N; i++){
-    for(int j=0; j<N; j++){
-      if (fabsf(res[i][j]-val[i][j]) > 1e-3){
-        printf("MISMATCH AT %d, %d :: %f != %f",i,j,res[i][j], val[i][j]);
-      }
-    }
-  }
 }
 
 // spliting into blocks of size BLOCK and then computing the matrix product (gives off no significant improvement)

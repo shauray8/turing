@@ -22,7 +22,12 @@ for i in range(1):
 
   print(f"{gflop/s= :.4f}")
 
-for i in range(10000):
+with open("./tmp/data","wb") as f:
+  f.write(A.data)
+  f.write(B.data)
+  f.write(res.data)
+
+for i in range(1):
   st = time.monotonic()
   res = torch.matmul(A1,B1)
   et = time.monotonic()
@@ -31,8 +36,4 @@ for i in range(10000):
 
   print(f"torch : {gflop/s= :.4f}")
 
-#with open("./tmp/data","wb") as f:
-#  f.write(A.data)
-#  f.write(B.data)
-#  f.write(res.data)
 
