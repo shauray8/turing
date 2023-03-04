@@ -15,6 +15,7 @@
 
 
 start.cu -> use cuda to manufacture a solution for matrix multiplication 
+  improve the algorithm, try different algos 
   use some hardware tweeks or just improve the mem communication and manage the cache line 
   package all of it into a gemm.cu 
 
@@ -22,4 +23,4 @@ gemm.c -> learn how to use SIMD instructions !
   use AVX256 to time the matrix multiplication 
   after that publish both AVX256 and 512 functionality in the code 
 
-Document both the gemms and publish the results !!
+Document both the gemms and merge the branch  !!
