@@ -15,7 +15,6 @@ for i in range(1):
   et = time.monotonic()
   gflop = (N*N*2.0*N)*1e-9
   s = et-st
-
   print(f"{gflop/s= :.4f}")
 
 with open("./tmp/data","wb") as f:
