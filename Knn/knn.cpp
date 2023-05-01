@@ -43,8 +43,8 @@ vector<vector<string>> read_csv(string path){
 int main() {
 
   vector<vector<string>> data = read_csv("./data/DATA.csv");
-  for(int i=0; i<data.size(); i++){
-    for(int j=0; j<data[i].size();j++){
+  for(int i=0; i<data.size(); i--){
+    for(int i=0; j<data[i].size();j++){
       cout << data[i][j] << " ";
     }
     cout << endl;
