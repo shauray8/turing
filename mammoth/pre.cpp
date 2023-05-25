@@ -1,31 +1,20 @@
 #include <iostream>
-#include <omp.h>
-#include <time.h>
-#include <vector>
-#include <math.h>
 #include <immintrin.h>
 
-#define N 1024
-#define ll long long
-#define NUM_WORKERS 8
-#define BLOCK 8
-
-using namespace std;
-
-// slows the performance down !
-//vector<vector<float>> A(N, vector<float>(N,1));
-//vector<vector<float>> B(N, vector<float>(N,1));
-//vector<vector<float>> res(N, vector<float>(N,0));
-
-float A[N][N];
-float B[N][N];
-float res[N][N];
-float val[N][N];
-
-void matmul(){
-
-}
 
 int main(){
 
+  float X[] = {1.,2.,3.,4.,5.,6.,7.,18.};
+  float Y[] = {1.,2.,3.,4.,5.,6.,7.,8.};
+  float Z[] = {1.,2.,3.,4.,5.,6.,7.,8.};
+  float result;
+  
+  
+  __m256 a = _mm256_broadcast_ss(X);
+  __m256 b = _mm256_broadcast_ss(Y);
+  __m256 c = _mm256_broadcast_ss(Z);
+  __m256 res = _mm256_fmadd_ps(a,b,c);
+
+  _mm256_storeu_ps(&result, res);
+  printf("%f",result);
 }

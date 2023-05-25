@@ -157,6 +157,28 @@ void conv(){
   }
 }
 
+
+void fma_conv(){
+  for(int i=0; i<N-K+1; i++){
+    for(int j=0; j<N-K+1; j++){
+      float temp = 0;
+      for(int x=0; x<K; x++){
+        for(int y=0; y<K; y++){
+          temp += A[i+x][j+y] * B[x][y];
+        }
+      }
+      res[i][j] = temp;
+    }
+  }
+  for(int i=0; i<N-K+1; i++){
+    for(int j=0; j<N-K+1; j++){
+      if (fabsf(res[i][j]-val[i][j]) > 1e-3){
+        printf("MISMATCH AT %d, %d :: %f != %f",i,j,res[i][j], val[i][j]);
+      }
+    }
+  }
+}
+
 int main(){
 
   FILE *f = fopen("./tmp/data","rb");
