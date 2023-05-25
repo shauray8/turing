@@ -10,7 +10,7 @@
 #include <immintrin.h>
 #include <cassert>
 
-#define N 128
+#define N 2048
 #define K 3
 #define ll long long
 #define NUM_WORKERS 8
@@ -33,9 +33,9 @@ float BB[K*K];
 float RES[(N-K+1) * (N-K+1)];
 float VAL[(N-K+1) * (N-K+1)];
 
-__m256 *Am = (__m256*)A;
-__m256 *Bm = (__m256*)B;
-__m256 *resm = (__m256*)res;
+__m256 *Am = (__m256*)AA;
+__m256 *Bm = (__m256*)BB;
+__m256 *resm = (__m256*)RES;
 
 int64_t nanos() {
     struct timespec start;
@@ -160,8 +160,7 @@ void conv(){
   }
 }
 
-
-void fma_conv(){
+void unrolled_conv(){
   for(int i=0; i<(N-K+1); i++){
     for(int j=0; j<(N-K+1); j++){
       float temp = 0;
@@ -180,6 +179,33 @@ void fma_conv(){
       }
     }
   }
+}
+
+void fma_conv(){
+  for(int i=0; i<(N-K+1); i++){
+    for(int j=0; j<(N-K+1); j++){
+      __m256 temp = _mm256_setzero_ps();
+      for(int x=0; x<K; x++){
+        for(int y=0; y<K; y++){
+          const float* inp = AA + (x*K) + y;
+          const float* kern = BB + (x*K) + y ;
+          __m256 input_data = _mm256_loadu_ps(inp);
+          __m256 kernel_data = _mm256_loadu_ps(kern);
+          temp = _mm256_fmadd_ps(input_data, kernel_data, temp);
+        }
+      }
+      //RES[i*(N-K+1) + j] = temp;
+      _mm256_storeu_ps(RES + i * (N-K+1) + j, temp);
+    }
+  }
+ // printf("%ld",sizeof(RES)/sizeof(float));
+ // for(int i=0; i<(N-K+1); i++){
+ //   for(int j=0; j<(N-K+1); j++){
+ //     if (fabsf(RES[i + j]-VAL[i + j]) > 1e-3){
+ //      // printf("MISMATCH AT %d, %d, %f :: %f",i,j,RES[i*(N-K+1) + j], VAL[i*(N-K+1) + j]);
+ //     }
+ //   }
+ // }
 }
 
 int main(){
