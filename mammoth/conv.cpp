@@ -8,8 +8,9 @@
 #include <vector>
 #include <math.h>
 #include <immintrin.h>
+#include <cassert>
 
-#define N 128
+#define N 2048
 #define K 3
 #define ll long long
 #define NUM_WORKERS 8
@@ -138,7 +139,7 @@ void strassen_v2(){
 void conv(){
   for(int i=0; i<N-K+1; i++){
     for(int j=0; j<N-K+1; j++){
-      int temp = 0;
+      float temp = 0;
       for(int x=0; x<K; x++){
         for(int y=0; y<K; y++){
           temp += A[i+x][j+y] * B[x][y];
@@ -149,7 +150,9 @@ void conv(){
   }
   for(int i=0; i<N-K+1; i++){
     for(int j=0; j<N-K+1; j++){
-      assert(res[i][j] == val[i][j])
+      if (fabsf(res[i][j]-val[i][j]) > 1e-3){
+        printf("MISMATCH AT %d, %d :: %f != %f",i,j,res[i][j], val[i][j]);
+      }
     }
   }
 }
@@ -158,8 +161,8 @@ int main(){
 
   FILE *f = fopen("./tmp/data","rb");
   fread(A, 1, sizeof(float)*N*N, f);
-  fread(B, 1, sizeof(float)*N*N, f);
-  fread(val, 1, sizeof(float)*N*N, f);
+  fread(B, 1, sizeof(float)*K*K, f);
+  fread(val, 1, sizeof(float)*(N-K+1)*(N-K+1), f);
   fclose(f);
 
   uint64_t start = nanos();
