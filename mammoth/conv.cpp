@@ -10,7 +10,7 @@
 #include <immintrin.h>
 #include <cassert>
 
-#define N 2048
+#define N 128
 #define K 3
 #define ll long long
 #define NUM_WORKERS 8
@@ -28,11 +28,14 @@ float B[K][K];
 float res[N-K+1][N-K+1];
 float val[N-K+1][N-K+1];
 
-/*
+float AA[N*N];
+float BB[K*K];
+float RES[(N-K+1) * (N-K+1)];
+float VAL[(N-K+1) * (N-K+1)];
+
 __m256 *Am = (__m256*)A;
 __m256 *Bm = (__m256*)B;
 __m256 *resm = (__m256*)res;
-*/
 
 int64_t nanos() {
     struct timespec start;
@@ -159,21 +162,21 @@ void conv(){
 
 
 void fma_conv(){
-  for(int i=0; i<N-K+1; i++){
-    for(int j=0; j<N-K+1; j++){
+  for(int i=0; i<(N-K+1); i++){
+    for(int j=0; j<(N-K+1); j++){
       float temp = 0;
       for(int x=0; x<K; x++){
         for(int y=0; y<K; y++){
-          temp += A[i+x][j+y] * B[x][y];
+          temp += AA[(x*N)+(i*N) + j+y] * BB[(x*K) + y];
         }
       }
-      res[i][j] = temp;
+      RES[i*(N-K+1) + j] = temp;
     }
   }
-  for(int i=0; i<N-K+1; i++){
-    for(int j=0; j<N-K+1; j++){
-      if (fabsf(res[i][j]-val[i][j]) > 1e-3){
-        printf("MISMATCH AT %d, %d :: %f != %f",i,j,res[i][j], val[i][j]);
+  for(int i=0; i<(N-K+1); i++){
+    for(int j=0; j<(N-K+1); j++){
+      if (fabsf(RES[i*(N-K+1) + j]-VAL[i*(N-K+1) + j]) > 1e-3){
+        printf("MISMATCH AT %d, %d, %f :: %f",i,j,RES[i*(N-K+1) + j], VAL[i*(N-K+1) + j]);
       }
     }
   }
@@ -182,13 +185,13 @@ void fma_conv(){
 int main(){
 
   FILE *f = fopen("./tmp/data","rb");
-  fread(A, 1, sizeof(float)*N*N, f);
-  fread(B, 1, sizeof(float)*K*K, f);
-  fread(val, 1, sizeof(float)*(N-K+1)*(N-K+1), f);
+  fread(AA, 1, sizeof(float)*N*N, f);
+  fread(BB, 1, sizeof(float)*K*K, f);
+  fread(VAL, 1, sizeof(float)*(N-K+1)*(N-K+1), f);
   fclose(f);
 
   uint64_t start = nanos();
-  conv();
+  fma_conv();
   uint64_t end = nanos();
   double time = double(end-start)*1e-9;
   double flop = (N-K+1)*(N-K+1)*(K*K*2.0*K)*1e-9;
