@@ -9,7 +9,8 @@
 #include <math.h>
 #include <immintrin.h>
 
-#define N 1024
+#define N 128
+#define K 3
 #define ll long long
 #define NUM_WORKERS 8
 #define BLOCK 8
@@ -22,13 +23,15 @@ using namespace std;
 //vector<vector<float>> res(N, vector<float>(N,0));
 
 float A[N][N];
-float B[N][N];
-float res[N][N];
-float val[N][N];
+float B[K][K];
+float res[N-K+1][N-K+1];
+float val[N-K+1][N-K+1];
 
+/*
 __m256 *Am = (__m256*)A;
 __m256 *Bm = (__m256*)B;
 __m256 *resm = (__m256*)res;
+*/
 
 int64_t nanos() {
     struct timespec start;
@@ -131,6 +134,26 @@ void strassen_v2(){
 
 // the compiler does use some XMM's but not very efficiently and no YMM's at all (?? do I not have AVX 2 ??)
 // my processor does support AVX2 its just the compiler ! making it better 
+
+void conv(){
+  for(int i=0; i<N-K+1; i++){
+    for(int j=0; j<N-K+1; j++){
+      int temp = 0;
+      for(int x=0; x<K; x++){
+        for(int y=0; y<K; y++){
+          temp += A[i+x][j+y] * B[x][y];
+        }
+      }
+      res[i][j] = temp;
+    }
+  }
+  for(int i=0; i<N-K+1; i++){
+    for(int j=0; j<N-K+1; j++){
+      assert(res[i][j] == val[i][j])
+    }
+  }
+}
+
 int main(){
 
   FILE *f = fopen("./tmp/data","rb");
@@ -140,10 +163,10 @@ int main(){
   fclose(f);
 
   uint64_t start = nanos();
-  dynamic_v1();
+  conv();
   uint64_t end = nanos();
   double time = double(end-start)*1e-9;
-  double flop = (N*N*2.0*N) *1e-9;
+  double flop = (N-K+1)*(N-K+1)*(K*K*2.0*K)*1e-9;
   printf("GFLOP/s: %f\n",flop/time);
 }
 
