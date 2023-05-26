@@ -8,6 +8,8 @@ int64_t nanos() {
     return (uint64_t)start.tv_sec*1000000000 + (uint64_t)start.tv_nsec;
 }
 
+
+
 int main(){
 
   float X[] = {21.,12.,3.,4.,5.,6.,7.,18.};
