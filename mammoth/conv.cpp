@@ -187,26 +187,24 @@ void fma_conv(){
       __m256 temp = {};
       for(int x=0; x<K; x++){
         for(int y=0; y<K; y++){
-          const float* inp = AA + x * K + y;
-          const float* kern = BB;
-          __m256 input_data = _mm256_loadu_ps(inp);
-          __m256 kernel_data = _mm256_loadu_ps(kern);
+          const float* inp = AA + (i+x) * N + (y+j);
+          const float* kern = BB + x * K + j;
+          __m256 input_data = _mm256_broadcast_ss(inp);
+          __m256 kernel_data = _mm256_broadcast_ss(kern);
           temp = _mm256_fmadd_ps(input_data, kernel_data, temp);
         }
       }
       //RES[i*(N-K+1) + j] = temp;
-      _mm256_storeu_ps(RES, temp);
+      _mm256_storeu_ps(RES + i * (N-K+1) + j, temp);
     }
   }
-  printf("%f",RES[0]);
- // printf("%ld",sizeof(RES)/sizeof(float));
- // for(int i=0; i<(N-K+1); i++){
- //   for(int j=0; j<(N-K+1); j++){
- //     if (fabsf(RES[i + j]-VAL[i + j]) > 1e-3){
- //      // printf("MISMATCH AT %d, %d, %f :: %f",i,j,RES[i*(N-K+1) + j], VAL[i*(N-K+1) + j]);
- //     }
- //   }
- // }
+  for(int i=0; i<(N-K+1); i++){
+    for(int j=0; j<(N-K+1); j++){
+      if (fabsf(RES[i + j]-VAL[i + j]) > 1e-3){
+        printf("MISMATCH AT %d, %d, %f :: %f",i,j,RES[i + j], VAL[ + j]);
+      }
+    }
+  }
 }
 
 void winoconv(){
