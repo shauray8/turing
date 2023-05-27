@@ -8,8 +8,10 @@
 #include <vector>
 #include <math.h>
 #include <immintrin.h>
+#include <cassert>
 
-#define N 1024
+#define N 4
+#define K 3
 #define ll long long
 #define NUM_WORKERS 8
 #define BLOCK 8
@@ -22,13 +24,18 @@ using namespace std;
 //vector<vector<float>> res(N, vector<float>(N,0));
 
 float A[N][N];
-float B[N][N];
-float res[N][N];
-float val[N][N];
+float B[K][K];
+float res[N-K+1][N-K+1];
+float val[N-K+1][N-K+1];
 
-__m256 *Am = (__m256*)A;
-__m256 *Bm = (__m256*)B;
-__m256 *resm = (__m256*)res;
+float AA[N*N];
+float BB[K*K];
+float RES[(N-K+1) * (N-K+1)];
+float VAL[(N-K+1) * (N-K+1)];
+
+__m256 *Am = (__m256*)AA;
+__m256 *Bm = (__m256*)BB;
+__m256 *resm = (__m256*)RES;
 
 int64_t nanos() {
     struct timespec start;
@@ -131,19 +138,92 @@ void strassen_v2(){
 
 // the compiler does use some XMM's but not very efficiently and no YMM's at all (?? do I not have AVX 2 ??)
 // my processor does support AVX2 its just the compiler ! making it better 
+
+void conv(){
+  for(int i=0; i<N-K+1; i++){
+    for(int j=0; j<N-K+1; j++){
+      float temp = 0;
+      for(int x=0; x<K; x++){
+        for(int y=0; y<K; y++){
+          temp += A[i+x][j+y] * B[x][y];
+        }
+      }
+      res[i][j] = temp;
+    }
+  }
+  for(int i=0; i<N-K+1; i++){
+    for(int j=0; j<N-K+1; j++){
+      if (fabsf(res[i][j]-val[i][j]) > 1e-3){
+        printf("MISMATCH AT %d, %d :: %f != %f",i,j,res[i][j], val[i][j]);
+      }
+    }
+  }
+}
+
+void unrolled_conv(){
+  for(int i=0; i<(N-K+1); i++){
+    for(int j=0; j<(N-K+1); j++){
+      float temp = 0;
+      for(int x=0; x<K; x++){
+        for(int y=0; y<K; y++){
+          temp += AA[(x*N)+(i*N) + j+y] * BB[(x*K) + y];
+        }
+      }
+      RES[i*(N-K+1) + j] = temp;
+    }
+  }
+  for(int i=0; i<(N-K+1); i++){
+    for(int j=0; j<(N-K+1); j++){
+      if (fabsf(RES[i*(N-K+1) + j]-VAL[i*(N-K+1) + j]) > 1e-3){
+        printf("MISMATCH AT %d, %d, %f :: %f",i,j,RES[i*(N-K+1) + j], VAL[i*(N-K+1) + j]);
+      }
+    }
+  }
+}
+
+void fma_conv(){
+  for(int i=0; i<(N-K+1); i++){
+    for(int j=0; j<(N-K+1); j++){
+      __m256 temp = {};
+      for(int x=0; x<K; x++){
+        for(int y=0; y<K; y++){
+          const float* inp = AA + (i+x) * N + (y+j);
+          const float* kern = BB + x * K + j;
+          __m256 input_data = _mm256_broadcast_ss(inp);
+          __m256 kernel_data = _mm256_broadcast_ss(kern);
+          temp = _mm256_fmadd_ps(input_data, kernel_data, temp);
+        }
+      }
+      //RES[i*(N-K+1) + j] = temp;
+      _mm256_storeu_ps(RES + i * (N-K+1) + j, temp);
+    }
+  }
+  for(int i=0; i<(N-K+1); i++){
+    for(int j=0; j<(N-K+1); j++){
+      if (fabsf(RES[i + j]-VAL[i + j]) > 1e-3){
+        printf("MISMATCH AT %d, %d, %f :: %f",i,j,RES[i + j], VAL[ + j]);
+      }
+    }
+  }
+}
+
+void winoconv(){
+  return;
+}
+
 int main(){
 
   FILE *f = fopen("./tmp/data","rb");
-  fread(A, 1, sizeof(float)*N*N, f);
-  fread(B, 1, sizeof(float)*N*N, f);
-  fread(val, 1, sizeof(float)*N*N, f);
+  fread(AA, 1, sizeof(float)*N*N, f);
+  fread(BB, 1, sizeof(float)*K*K, f);
+  fread(VAL, 1, sizeof(float)*(N-K+1)*(N-K+1), f);
   fclose(f);
 
   uint64_t start = nanos();
-  dynamic_v1();
+  fma_conv();
   uint64_t end = nanos();
   double time = double(end-start)*1e-9;
-  double flop = (N*N*2.0*N) *1e-9;
+  double flop = (N-K+1)*(N-K+1)*(K*K*2.0*K)*1e-9;
   printf("GFLOP/s: %f\n",flop/time);
 }
 
