@@ -220,7 +220,7 @@ int main(){
   fclose(f);
 
   uint64_t start = nanos();
-  fma_conv();
+  conv();
   uint64_t end = nanos();
   double time = double(end-start)*1e-9;
   double flop = (N-K+1)*(N-K+1)*(K*K*2.0*K)*1e-9;
