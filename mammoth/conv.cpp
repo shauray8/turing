@@ -10,7 +10,7 @@
 #include <immintrin.h>
 #include <cassert>
 
-#define N 4096
+#define N 2048
 #define K 3
 #define ll long long
 #define NUM_WORKERS 8
@@ -183,12 +183,12 @@ void unrolled_conv(){
 
 // improve space complexity and store operations
 void par_conv(){
-  int i = 0,remain = 0, RR=0;
+  int i = 0,remain = 0;
   while(i < (N-K+1)){
-    int j = remain;
+    int j = remain, RR = 0;
     while(j < (N-K+1)){
       float temp[NUM_WORKERS] = {0};
-      #pragma omp parallel for
+      #pragma omp parallel for schedule(static) shared(AA,BB)
       for(int id=0; id<NUM_WORKERS; id++){
         for(int x=0; x<K; x++){
           for(int y=0; y<K; y++){
@@ -196,7 +196,7 @@ void par_conv(){
           }
         }
       }
-      for(int x=0; x< (NUM_WORKERS % ((N-K+1)*(N-K+1) - (i*NUM_WORKERS + j*NUM_WORKERS)) == 0 ? (N-K+1)*(N-K+1) : NUM_WORKERS); x++){
+      for(int x=0; x< (NUM_WORKERS % ((N-K+1)*(N-K+1) - (i*(N-K+1) + j)) == 0 ? ((N-K+1)*(N-K+1) - (i*(N-K+1)+j)) : NUM_WORKERS); x++){
         RES[i*(N-K+1)+j+x] = temp[x];
         //printf("%f\n",temp[x]);
       }
@@ -261,6 +261,11 @@ int main(){
   double time = double(end-start)*1e-9;
   double flop = (N-K+1)*(N-K+1)*(K*K*2.0*K)*1e-9;
   printf("GFLOP/s: %f\n",flop/time);
+  //for(int i=0; i<(N-K+1); i++){
+  //  for(int j=0; j<(N-K+1); j++){
+  //      printf("MISMATCH AT %d, %d, %f -- %f\n",i,j,VAL[i*(N-K+1) + j], RES[i*(N-K+1)+j]);
+  //  }
+  //}
 
 }
 

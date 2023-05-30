@@ -3,7 +3,7 @@ import os
 import time
 from scipy import signal
 
-N = 4096
+N = 2048
 K = 3
 
 A = np.random.randn(N,N).astype(np.float32)
@@ -47,20 +47,19 @@ def winograd(input, kernel):
     print(output)
     return output
 
-def someee():
-  st = time.monotonic()
-  for i in range(N-K+1):
-    for j in range(N-K+1):
-      temp = 0
-      for k in range(K):
-        for l in range(K):
-          temp += A[i+k][j+l] * B[k][l]
+st = time.monotonic()
+for i in range(N-K+1):
+  for j in range(N-K+1):
+    temp = 0
+    for k in range(K):
+      for l in range(K):
+        temp += A[i+k][j+l] * B[k][l]
 
-      C[i][j] = temp
-  et = time.monotonic()
-  gflop = ops*1e-9
-  s = et-st
-  print(f"{gflop/s= :.4f}")
+    C[i][j] = temp
+et = time.monotonic()
+gflop = ops*1e-9
+s = et-st
+print(f"{gflop/s= :.4f}")
 #print(C)
 
 """
