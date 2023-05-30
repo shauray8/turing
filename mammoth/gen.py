@@ -3,7 +3,7 @@ import os
 import time
 from scipy import signal
 
-N = 1024
+N = 8
 K = 3
 
 A = np.random.randn(N,N).astype(np.float32)

@@ -10,7 +10,7 @@
 #include <immintrin.h>
 #include <cassert>
 
-#define N 4
+#define N 8
 #define K 3
 #define ll long long
 #define NUM_WORKERS 8
@@ -181,6 +181,34 @@ void unrolled_conv(){
   }
 }
 
+void par_conv(){
+  for(int i=0; i<(N-K+1); i+= int(NUM_WORKERS / (N-K+1))){
+    for(int j=0; j<(N-K+1); j+= NUM_WORKERS % (N-K+1)){
+      float temp[NUM_WORKERS] = {0};
+      #pragma omp parallel for schedule(static,NUM_WORKERS)
+      for(int id=0; id<NUM_WORKERS; id++){
+        for(int x=0; x<K; x++){
+          for(int y=0; y<K; y++){
+            temp[id] += AA[(x*N)+((i + int(id/(N-K+1))) * N) + j + (id%(N-K+1)) + y] * BB[(x*K) + y];
+          }
+        }
+      }
+      printf("%d --- %d \n",i,j);
+      for(int x=0; x< (NUM_WORKERS % ((N-K+1)*(N-K+1) - (i*NUM_WORKERS + j*NUM_WORKERS)) == 0 ? (N-K+1)*(N-K+1) : NUM_WORKERS); x++){
+        RES[i*(N-K+1)+j+x] = temp[x];
+        //printf("%f\n",temp[x]);
+      }
+    }
+  }
+  for(int i=0; i<(N-K+1); i++){
+    for(int j=0; j<(N-K+1); j++){
+      if (fabsf(RES[i*(N-K+1) + j]-VAL[i*(N-K+1) + j]) > 1e-3){
+        //printf("MISMATCH AT %d, %d, %f :: %f \n",i,j,RES[i*(N-K+1) + j], VAL[i*(N-K+1)+j]);
+      }
+    }
+  }
+}
+
 void fma_conv(){
   for(int i=0; i<(N-K+1); i++){
     for(int j=0; j<(N-K+1); j++){
@@ -220,7 +248,7 @@ int main(){
   fclose(f);
 
   uint64_t start = nanos();
-  conv();
+  par_conv();
   uint64_t end = nanos();
   double time = double(end-start)*1e-9;
   double flop = (N-K+1)*(N-K+1)*(K*K*2.0*K)*1e-9;
